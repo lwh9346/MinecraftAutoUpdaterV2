@@ -1,5 +1,9 @@
 package filelist
 
+import (
+	"strings"
+)
+
 func CompareFileList(oldFileList, newFileList FileList) (surp, lack FileList) {
 	su := make(FileList)
 	la := make(FileList)
@@ -22,12 +26,8 @@ func IgnoreFileInFileList(ignoreList []string, fileList FileList) FileList {
 	del := make([]string, len(ignoreList))
 	for kf := range fileList {
 		for _, ki := range ignoreList {
-			kfn := []rune(kf)
-			kin := []rune(ki)
-			if len(kin) <= len(kfn) {
-				if ki == string(kfn[:len(kin)]) {
-					del = append(del, kf)
-				}
+			if strings.HasPrefix(kf, ki) {
+				del = append(del, kf)
 			}
 		}
 	}

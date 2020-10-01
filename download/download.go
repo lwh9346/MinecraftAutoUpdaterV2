@@ -4,7 +4,9 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
+	"path/filepath"
 	fp "path/filepath"
 	"strings"
 
@@ -28,6 +30,7 @@ func downloadFile(url, destDir string) error {
 
 func downloadFileAndCheck(url, destDir, hash string, limitor, callback chan (int)) error {
 	limitor <- 1
+	os.MkdirAll(filepath.Dir(destDir), os.ModePerm)
 	_, e := os.Stat(destDir)
 	if e == nil && hash == filelist.GetHash(destDir) {
 		callback <- 0
@@ -42,6 +45,7 @@ func downloadFileAndCheck(url, destDir, hash string, limitor, callback chan (int
 			return nil
 		}
 		if i > 10 {
+			log.Println("下载失败：" + url)
 			callback <- 1
 			return err
 		}
@@ -54,7 +58,11 @@ func DownloadAndCheckFilesInFileList(rootURL string, filelist filelist.FileList)
 	limitor := make(chan (int), 16)
 	callback := make(chan (int))
 	for filepath, filehash := range filelist {
-		go downloadFileAndCheck(strings.Join([]string{rootURL, filepath}, "/"), fp.FromSlash(filepath), filehash, limitor, callback)
+		//对URL进行编码处理
+		escapedURL := url.QueryEscape(rootURL + "/" + filepath)
+		escapedURL = strings.ReplaceAll(escapedURL, "%3A", ":")
+		escapedURL = strings.ReplaceAll(escapedURL, "%2F", "/")
+		go downloadFileAndCheck(escapedURL, fp.FromSlash(filepath), filehash, limitor, callback)
 	}
 	if nFiles == 0 {
 		return
