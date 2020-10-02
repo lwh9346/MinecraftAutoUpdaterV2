@@ -73,8 +73,11 @@ func autoUpdate() {
 		for path, _ := range surp {
 			os.Remove(path)
 		}
-		download.DownloadAndCheckFilesInFileList(resourceURL, lack)
+		failed := download.DownloadAndCheckFilesInFileList(resourceURL, lack)
 		log.Println("下载完毕")
+		if failed == 0 {
+			jsonhelper.WriteStringToFile("./updateinfo.json", jsonhelper.GetJSONStringOfUpdateInfo(updateinfo))
+		}
 	} else {
 		log.Println("已是最新版")
 	}

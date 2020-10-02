@@ -52,7 +52,7 @@ func downloadFileAndCheck(url, destDir, hash string, limitor, callback chan (int
 	}
 }
 
-func DownloadAndCheckFilesInFileList(rootURL string, filelist filelist.FileList) {
+func DownloadAndCheckFilesInFileList(rootURL string, filelist filelist.FileList) int {
 	nFiles := len(filelist)
 	var succeed, failed int
 	limitor := make(chan (int), 16)
@@ -65,7 +65,7 @@ func DownloadAndCheckFilesInFileList(rootURL string, filelist filelist.FileList)
 		go downloadFileAndCheck(escapedURL, fp.FromSlash(filepath), filehash, limitor, callback)
 	}
 	if nFiles == 0 {
-		return
+		return 0
 	}
 	for signal := range callback {
 		<-limitor
@@ -82,5 +82,5 @@ func DownloadAndCheckFilesInFileList(rootURL string, filelist filelist.FileList)
 			log.Printf("下载成功:%v,下载失败:%v,尚未下载:%v\n", succeed, failed, uncompleted)
 		}
 	}
-
+	return failed
 }
