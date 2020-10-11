@@ -35,9 +35,8 @@ func downloadFileAndCheck(url, destDir, hash string, limitor, callback chan (int
 	if e == nil && hash == filelist.GetHash(destDir) {
 		callback <- 0
 		return nil
-	} else {
-		os.Remove(destDir)
 	}
+	os.Remove(destDir)
 	for i := 0; ; i++ {
 		err := downloadFile(url, destDir)
 		if err == nil && hash == filelist.GetHash(destDir) {
@@ -52,6 +51,7 @@ func downloadFileAndCheck(url, destDir, hash string, limitor, callback chan (int
 	}
 }
 
+//DownloadAndCheckFilesInFileList 下载并检验文件
 func DownloadAndCheckFilesInFileList(rootURL string, filelist filelist.FileList) int {
 	nFiles := len(filelist)
 	var succeed, failed int
