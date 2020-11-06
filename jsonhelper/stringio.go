@@ -10,6 +10,7 @@ import (
 	"github.com/lwh9346/MinecraftAutoUpdaterV2/filelist"
 )
 
+//GetJSONStringByURL 从指定地址以get形式获取string
 func GetJSONStringByURL(url string) JSONString {
 	r, e := http.Get(url)
 	if e != nil {
@@ -22,6 +23,7 @@ func GetJSONStringByURL(url string) JSONString {
 	return string(b)
 }
 
+//GetJSONStringByFilePath 从指定本地地址以get形式获取string
 func GetJSONStringByFilePath(filepath string) JSONString {
 	b, err := ioutil.ReadFile(filepath)
 	if err != nil {
@@ -30,6 +32,7 @@ func GetJSONStringByFilePath(filepath string) JSONString {
 	return string(b)
 }
 
+//WriteStringToFile 顾名思义
 func WriteStringToFile(file, s string) error {
 	var e error
 	_, e = os.Stat(file)
@@ -48,11 +51,13 @@ func WriteStringToFile(file, s string) error {
 	return nil
 }
 
+//GetJSONStringOfUpdateInfo 顾名思义
 func GetJSONStringOfUpdateInfo(ui UpdateInfo) JSONString {
 	d, _ := json.Marshal(ui)
 	return string(d)
 }
 
+//GetJSONStringOfFileList 顾名思义
 func GetJSONStringOfFileList(fl filelist.FileList) JSONString {
 	d, _ := json.Marshal(fl)
 	return string(d)
