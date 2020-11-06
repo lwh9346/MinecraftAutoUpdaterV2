@@ -1,4 +1,4 @@
-package main
+package updater
 
 import (
 	"log"
@@ -70,7 +70,7 @@ func autoUpdate() {
 		oldFileList = filelist.IgnoreFileInFileList(updateinfo.IgnoreList, oldFileList)
 		newFileList = filelist.IgnoreFileInFileList(updateinfo.IgnoreList, newFileList)
 		surp, lack := filelist.CompareFileList(oldFileList, newFileList)
-		for path, _ := range surp {
+		for path := range surp {
 			os.Remove(path)
 		}
 		failed := download.DownloadAndCheckFilesInFileList(resourceURL, lack)
