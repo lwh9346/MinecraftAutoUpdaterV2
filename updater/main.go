@@ -1,9 +1,10 @@
-package updater
+package main
 
 import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"time"
 
 	"github.com/lwh9346/MinecraftAutoUpdaterV2/download"
@@ -22,6 +23,12 @@ func main() {
 			initUpdateInfo()
 		case "pack":
 			makeUpdatePack()
+		case "finishselfupdate":
+			finishSelfUpdate()
+		case "hash":
+			selfHash := filelist.GetHash(os.Args[0])
+			jsonhelper.WriteStringToFile("./updaterhash", selfHash)
+			log.Println(selfHash)
 		}
 		return
 	}
@@ -54,6 +61,7 @@ func makeUpdatePack() {
 }
 
 func autoUpdate() {
+	selfUpdate()
 	log.Println("开始自动更新")
 	localUpdateInfo := jsonhelper.UpdateInfo{}
 	_, e := os.Stat("./updateinfo.json")
@@ -94,4 +102,32 @@ func launchGameLauncher() {
 		log.Println("启动失败，你可能没安装java")
 		time.Sleep(60 * time.Second)
 	}
+}
+
+func selfUpdate() {
+	log.Println("开始更新器更新检查")
+	selfHash := filelist.GetHash(os.Args[0])
+	latestHash := jsonhelper.GetJSONStringByURL(resourceURL + "/updaterhash")
+	if latestHash == selfHash {
+		log.Println("更新器已是最新版")
+		return
+	}
+	log.Printf("当前程序hash：%s\n", selfHash)
+	log.Printf("最新程序hash：%s\n", latestHash)
+	log.Println("开始自我更新")
+	newProgramURL := resourceURL + "/program/AutoUpdater.exe"
+	exeName := filepath.Join(filepath.Dir(os.Args[0]), "SelfUpdater.exe")
+	os.Remove(exeName)
+	download.DownloadFile(resourceURL+"/program/SelfUpdater.exe", exeName)
+	cmd := exec.Command(exeName, os.Args[0], newProgramURL)
+	cmd.Dir = filepath.Dir(os.Args[0])
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Start()
+}
+
+func finishSelfUpdate() {
+	os.Remove(filepath.Join(filepath.Dir(os.Args[0]), "SelfUpdater.exe"))
+	log.Println("自我更新完成")
 }

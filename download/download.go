@@ -13,7 +13,8 @@ import (
 	"github.com/lwh9346/MinecraftAutoUpdaterV2/filelist"
 )
 
-func downloadFile(url, destDir string) error {
+//DownloadFile 简单地下载文件
+func DownloadFile(url, destDir string) error {
 	destFile, err := os.Create(destDir)
 	defer destFile.Close()
 	if err != nil {
@@ -38,7 +39,7 @@ func downloadFileAndCheck(url, destDir, hash string, limitor, callback chan (int
 	}
 	os.Remove(destDir)
 	for i := 0; ; i++ {
-		err := downloadFile(url, destDir)
+		err := DownloadFile(url, destDir)
 		if err == nil && hash == filelist.GetHash(destDir) {
 			callback <- 0
 			return nil
