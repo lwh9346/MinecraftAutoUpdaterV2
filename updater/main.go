@@ -13,7 +13,7 @@ import (
 	"github.com/lwh9346/MinecraftAutoUpdaterV2/jsonhelper"
 )
 
-const resourceURL = "https://minecraft-updater.oss-cn-shanghai.aliyuncs.com"
+const resourceURL = "https://minecraft-updater.oss-accelerate.aliyuncs.com"
 
 func main() {
 	log.Println("MinecraftAutoUpdaterV2已启动")
