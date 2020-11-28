@@ -12,6 +12,8 @@ import (
 
 func main() {
 	fileToUpdate := os.Args[1]
+	log.Println("等待更新器退出")
+	time.Sleep(time.Millisecond * 500)
 	log.Printf("正在删除：%s\n", fileToUpdate)
 	err := os.Remove(fileToUpdate)
 	if err != nil {
