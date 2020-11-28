@@ -125,6 +125,7 @@ func selfUpdate() {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Start()
+	os.Exit(0)
 }
 
 func finishSelfUpdate() {
