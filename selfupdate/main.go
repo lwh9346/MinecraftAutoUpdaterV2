@@ -13,9 +13,12 @@ import (
 func main() {
 	fileToUpdate := os.Args[1]
 	log.Printf("正在删除：%s\n", fileToUpdate)
-	err := os.Remove(fileToUpdate)
-	if err != nil {
-		log.Fatalf("自我更新失败，删除文件时出现错误：%s\n", err.Error())
+	var err error
+	err = os.Remove(fileToUpdate)
+	for err != nil {
+		log.Printf("删除过程中出现错误，将在5秒钟后重试：%s\n", err.Error())
+		time.Sleep(time.Second * 5)
+		err = os.Remove(fileToUpdate)
 	}
 	log.Println("成功删除文件")
 	fileToDownload := os.Args[2]
