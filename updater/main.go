@@ -131,4 +131,5 @@ func selfUpdate() {
 func finishSelfUpdate() {
 	os.Remove(filepath.Join(filepath.Dir(os.Args[0]), "SelfUpdater.exe"))
 	log.Println("自我更新完成")
+	autoUpdate()
 }
