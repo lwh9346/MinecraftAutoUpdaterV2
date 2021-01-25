@@ -1,6 +1,7 @@
 package download
 
 import (
+	"github.com/lwh9346/MinecraftAutoUpdaterV2/filelist"
 	"io"
 	"log"
 	"net/http"
@@ -8,9 +9,6 @@ import (
 	"os"
 	"path/filepath"
 	fp "path/filepath"
-	"strings"
-
-	"github.com/lwh9346/MinecraftAutoUpdaterV2/filelist"
 )
 
 //DownloadFile 简单地下载文件
@@ -61,8 +59,7 @@ func DownloadAndCheckFilesInFileList(rootURL string, filelist filelist.FileList)
 	for filepath, filehash := range filelist {
 		//对URL进行编码处理
 		escapedURL := url.QueryEscape(rootURL + "/" + filepath)
-		escapedURL = strings.Replace(escapedURL, "%3A", ":", -1)
-		escapedURL = strings.Replace(escapedURL, "%2F", "/", -1)
+		escapedURL, _ = url.QueryUnescape(escapedURL)
 		go downloadFileAndCheck(escapedURL, fp.FromSlash(filepath), filehash, limitor, callback)
 	}
 	if nFiles == 0 {
