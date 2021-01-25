@@ -61,8 +61,8 @@ func DownloadAndCheckFilesInFileList(rootURL string, filelist filelist.FileList)
 	for filepath, filehash := range filelist {
 		//对URL进行编码处理
 		escapedURL := url.QueryEscape(rootURL + "/" + filepath)
-		escapedURL = strings.ReplaceAll(escapedURL, "%3A", ":")
-		escapedURL = strings.ReplaceAll(escapedURL, "%2F", "/")
+		escapedURL = strings.Replace(escapedURL, "%3A", ":", -1)
+		escapedURL = strings.Replace(escapedURL, "%2F", "/", -1)
 		go downloadFileAndCheck(escapedURL, fp.FromSlash(filepath), filehash, limitor, callback)
 	}
 	if nFiles == 0 {
