@@ -29,6 +29,8 @@ func main() {
 			selfHash := filelist.GetHash(os.Args[0])
 			jsonhelper.WriteStringToFile("./updaterhash", selfHash)
 			log.Println(selfHash)
+		case "launch":
+			launchGameLauncher()
 		}
 		return
 	}
@@ -104,7 +106,7 @@ func launchGameLauncher() {
 	var cmd *exec.Cmd
 	switch launcherType {
 	case "jar":
-		cmd = exec.Command("java", "-jar", "Launcher.jar")
+		cmd = exec.Command("./jre8/bin/java.exe", "-jar", "Launcher.jar")
 	case "exe":
 		cmd = exec.Command("./Launcher.exe")
 	case "none":
