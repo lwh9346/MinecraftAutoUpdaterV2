@@ -94,12 +94,28 @@ func autoUpdate() {
 
 func launchGameLauncher() {
 	log.Println("正在启动游戏启动器，请不要关闭更新器窗口")
-	cmd := exec.Command("java", "-jar", "Launcher.jar")
+	launcherType := "none"
+	if _, e := os.Stat("./game/Launcher.jar"); e == nil {
+		launcherType = "jar"
+	}
+	if _, e := os.Stat("./game/Launcher.exe"); e == nil {
+		launcherType = "exe"
+	}
+	var cmd *exec.Cmd
+	switch launcherType {
+	case "jar":
+		cmd = exec.Command("java", "-jar", "Launcher.jar")
+	case "exe":
+		cmd = exec.Command("./Launcher.exe")
+	case "none":
+		log.Println("启动失败，找不到启动器，请联系管理员")
+		time.Sleep(60 * time.Second)
+		os.Exit(0)
+	}
 	cmd.Dir = "./game"
-	//cmd.Stdout = os.Stdout
 	err := cmd.Start()
 	if err != nil {
-		log.Println("启动失败，你可能没安装java")
+		log.Println("启动失败，请联系管理员")
 		time.Sleep(60 * time.Second)
 	}
 }
