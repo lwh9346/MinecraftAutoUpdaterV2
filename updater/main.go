@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/gonutz/w32/v2"
+
 	"github.com/lwh9346/MinecraftAutoUpdaterV2/download"
 
 	"github.com/lwh9346/MinecraftAutoUpdaterV2/filelist"
@@ -120,6 +122,9 @@ func launchGameLauncher() {
 		log.Println("启动失败，请联系管理员")
 		time.Sleep(60 * time.Second)
 	}
+	//使用win32api关闭命令行窗口
+	console := w32.GetConsoleWindow()
+	w32.ShowWindow(console, w32.SW_HIDE)
 }
 
 func selfUpdate() {
