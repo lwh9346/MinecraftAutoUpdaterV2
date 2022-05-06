@@ -13,6 +13,7 @@ import (
 
 	"github.com/lwh9346/MinecraftAutoUpdaterV2/filelist"
 	"github.com/lwh9346/MinecraftAutoUpdaterV2/jsonhelper"
+	"github.com/lwh9346/MinecraftAutoUpdaterV2/utils"
 )
 
 const resourceURL = "https://minecraft-updater.oss-accelerate.aliyuncs.com"
@@ -85,6 +86,7 @@ func autoUpdate() {
 		for path := range surp {
 			os.Remove(path)
 		}
+		utils.RemoveEmptyDirectories("./game")
 		failed := download.DownloadAndCheckFilesInFileList(resourceURL, lack)
 		log.Println("下载完毕")
 		if failed == 0 {
