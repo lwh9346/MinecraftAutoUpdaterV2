@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/lwh9346/MinecraftAutoUpdaterV2/download"
+	"mau2/utils"
 )
 
 func main() {
@@ -23,7 +23,7 @@ func main() {
 	log.Println("成功删除文件")
 	fileToDownload := os.Args[2]
 	log.Println("开始下载新版更新器")
-	err = download.DownloadFile(fileToDownload, fileToUpdate)
+	err = utils.DownloadFile(fileToDownload, fileToUpdate)
 	if err != nil {
 		log.Printf("自我更新失败，无法下载文件：%s\n", fileToDownload)
 		log.Println("你需要重新下载更新器了")

@@ -9,11 +9,9 @@ import (
 
 	"github.com/gonutz/w32/v2"
 
-	"github.com/lwh9346/MinecraftAutoUpdaterV2/download"
-
-	"github.com/lwh9346/MinecraftAutoUpdaterV2/filelist"
-	"github.com/lwh9346/MinecraftAutoUpdaterV2/jsonhelper"
-	"github.com/lwh9346/MinecraftAutoUpdaterV2/utils"
+	"mau2/filelist"
+	"mau2/updateinfo"
+	"mau2/utils"
 )
 
 const resourceURL = "https://minecraft-updater.oss-accelerate.aliyuncs.com"
@@ -30,7 +28,7 @@ func main() {
 			finishSelfUpdate()
 		case "hash":
 			selfHash := filelist.GetHash(os.Args[0])
-			jsonhelper.WriteStringToFile("./updaterhash", selfHash)
+			utils.WriteStringToFile("./updaterhash", selfHash)
 			log.Println(selfHash)
 		case "launch":
 			launchGameLauncher()
@@ -38,59 +36,58 @@ func main() {
 		return
 	}
 	autoUpdate()
-	return
 }
 
 func initUpdateInfo() {
 	log.Println("开始初始化更新包")
 	os.RemoveAll("./pack")
 	os.MkdirAll("./pack", os.ModePerm)
-	filelist := filelist.GetFileList("./game")
-	updateinfo := jsonhelper.UpdateInfo{GameVersion: 1}
-	jsonhelper.WriteStringToFile("./pack/filelist.json", jsonhelper.GetJSONStringOfFileList(filelist))
-	jsonhelper.WriteStringToFile("./pack/updateinfo.json", jsonhelper.GetJSONStringOfUpdateInfo(updateinfo))
+	fl := filelist.GetFileList("./game")
+	ui := updateinfo.UpdateInfo{GameVersion: 1}
+	utils.WriteStringToFile("./pack/filelist.json", updateinfo.ToJSON(ui))
+	utils.WriteStringToFile("./pack/updateinfo.json", filelist.ToJSON(fl))
 	log.Println("更新包初始化完毕")
 }
 
 func makeUpdatePack() {
 	log.Println("开始制作更新包")
-	updateinfo := jsonhelper.LoadUpdateInfoFromJSON(jsonhelper.GetJSONStringByURL(resourceURL + "/updateinfo.json"))
-	updateinfo.GameVersion++
+	ui := updateinfo.FromJSON(utils.ReadStringFromURL(resourceURL + "/updateinfo.json"))
+	ui.GameVersion++
 	os.RemoveAll("./pack")
 	os.MkdirAll("./pack", os.ModePerm)
 	fl := filelist.GetFileList("./game")
-	fl = filelist.IgnoreFileInFileList(updateinfo.IgnoreList, fl)
-	jsonhelper.WriteStringToFile("./pack/filelist.json", jsonhelper.GetJSONStringOfFileList(fl))
-	jsonhelper.WriteStringToFile("./pack/updateinfo.json", jsonhelper.GetJSONStringOfUpdateInfo(updateinfo))
+	filelist.Ignore(ui.IgnoreList, fl)
+	utils.WriteStringToFile("./pack/filelist.json", filelist.ToJSON(fl))
+	utils.WriteStringToFile("./pack/updateinfo.json", updateinfo.ToJSON((ui)))
 	log.Println("更新包制作完毕")
 }
 
 func autoUpdate() {
 	selfUpdate()
 	log.Println("开始自动更新")
-	localUpdateInfo := jsonhelper.UpdateInfo{}
+	localUpdateInfo := updateinfo.UpdateInfo{}
 	_, e := os.Stat("./updateinfo.json")
 	if e == nil {
-		localUpdateInfo = jsonhelper.LoadUpdateInfoFromJSON(jsonhelper.GetJSONStringByFilePath("./updateinfo.json"))
+		localUpdateInfo = updateinfo.FromJSON(utils.ReadStringFromFile("./updateinfo.json"))
 	}
-	updateinfo := jsonhelper.LoadUpdateInfoFromJSON(jsonhelper.GetJSONStringByURL(resourceURL + "/updateinfo.json"))
-	log.Printf("已获取最新版本信息，当前版本:%d，最新版本:%d\n", localUpdateInfo.GameVersion, updateinfo.GameVersion)
-	if updateinfo.GameVersion > localUpdateInfo.GameVersion {
+	ui := updateinfo.FromJSON(utils.ReadStringFromURL(resourceURL + "/updateinfo.json"))
+	log.Printf("已获取最新版本信息，当前版本:%d，最新版本:%d\n", localUpdateInfo.GameVersion, ui.GameVersion)
+	if ui.GameVersion > localUpdateInfo.GameVersion {
 		log.Println("开始更新所需下载文件并删除旧文件")
 		os.MkdirAll("./game", os.ModePerm)
 		oldFileList := filelist.GetFileList("./game")
-		newFileList := jsonhelper.GetFileListFromJSON(jsonhelper.GetJSONStringByURL(resourceURL + "/filelist.json"))
-		oldFileList = filelist.IgnoreFileInFileList(updateinfo.IgnoreList, oldFileList)
-		newFileList = filelist.IgnoreFileInFileList(updateinfo.IgnoreList, newFileList)
+		newFileList := filelist.FromJSON(utils.ReadStringFromURL(resourceURL + "/filelist.json"))
+		filelist.Ignore(ui.IgnoreList, oldFileList)
+		filelist.Ignore(ui.IgnoreList, newFileList)
 		surp, lack := filelist.CompareFileList(oldFileList, newFileList)
 		for path := range surp {
 			os.Remove(path)
 		}
 		utils.RemoveEmptyDirectories("./game")
-		failed := download.DownloadAndCheckFilesInFileList(resourceURL, lack)
+		failed := utils.DownloadAndCheckFilesInFileList(resourceURL, lack)
 		log.Println("下载完毕")
 		if failed == 0 {
-			jsonhelper.WriteStringToFile("./updateinfo.json", jsonhelper.GetJSONStringOfUpdateInfo(updateinfo))
+			utils.WriteStringToFile("./updateinfo.json", updateinfo.ToJSON(ui))
 		}
 	} else {
 		log.Println("已是最新版")
@@ -132,7 +129,7 @@ func launchGameLauncher() {
 func selfUpdate() {
 	log.Println("开始更新器更新检查")
 	selfHash := filelist.GetHash(os.Args[0])
-	latestHash := jsonhelper.GetJSONStringByURL(resourceURL + "/updaterhash")
+	latestHash := utils.ReadStringFromURL(resourceURL + "/updaterhash")
 	if latestHash == selfHash {
 		log.Println("更新器已是最新版")
 		return
@@ -143,7 +140,7 @@ func selfUpdate() {
 	newProgramURL := resourceURL + "/program/AutoUpdater.exe"
 	exeName := filepath.Join(filepath.Dir(os.Args[0]), "SelfUpdater.exe")
 	os.Remove(exeName)
-	download.DownloadFile(resourceURL+"/program/SelfUpdater.exe", exeName)
+	utils.DownloadFile(resourceURL+"/program/SelfUpdater.exe", exeName)
 	cmd := exec.Command(exeName, os.Args[0], newProgramURL)
 	cmd.Dir = filepath.Dir(os.Args[0])
 	cmd.Stdin = os.Stdin
