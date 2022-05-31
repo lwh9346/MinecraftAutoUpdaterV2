@@ -35,6 +35,7 @@ func main() {
 		}
 		return
 	}
+	selfUpdate()
 	autoUpdate()
 }
 
@@ -63,7 +64,6 @@ func makeUpdatePack() {
 }
 
 func autoUpdate() {
-	selfUpdate()
 	log.Println("开始自动更新")
 	localUpdateInfo := updateinfo.UpdateInfo{}
 	_, e := os.Stat("./updateinfo.json")
