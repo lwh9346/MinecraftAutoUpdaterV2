@@ -9,12 +9,13 @@ import (
 
 	"github.com/gonutz/w32/v2"
 
+	"mau2/config"
 	"mau2/filelist"
 	"mau2/updateinfo"
 	"mau2/utils"
 )
 
-const resourceURL = "https://minecraft-updater.oss-accelerate.aliyuncs.com"
+const resourceURL = config.ResourceURL
 
 func main() {
 	log.Println("MinecraftAutoUpdaterV2已启动")
@@ -65,15 +66,16 @@ func makeUpdatePack() {
 
 func autoUpdate() {
 	log.Println("开始自动更新")
-	localUpdateInfo := updateinfo.UpdateInfo{}
+	lui := updateinfo.UpdateInfo{}
 	_, e := os.Stat("./updateinfo.json")
 	if e == nil {
-		localUpdateInfo = updateinfo.FromJSON(utils.ReadStringFromFile("./updateinfo.json"))
+		lui = updateinfo.FromJSON(utils.ReadStringFromFile("./updateinfo.json"))
 	}
 	ui := updateinfo.FromJSON(utils.ReadStringFromURL(resourceURL + "/updateinfo.json"))
-	log.Printf("已获取最新版本信息，当前版本:%d，最新版本:%d\n", localUpdateInfo.GameVersion, ui.GameVersion)
-	if ui.GameVersion > localUpdateInfo.GameVersion {
+	log.Printf("当前版本:%d，最新版本:%d\n", lui.GameVersion, ui.GameVersion)
+	if ui.GameVersion > lui.GameVersion {
 		log.Println("开始更新所需下载文件并删除旧文件")
+		lui.FixVersion = 0
 		os.MkdirAll("./game", os.ModePerm)
 		oldFileList := filelist.GetFileList("./game")
 		newFileList := filelist.FromJSON(utils.ReadStringFromURL(resourceURL + "/filelist.json"))
@@ -86,12 +88,29 @@ func autoUpdate() {
 		utils.RemoveEmptyDirectories("./game")
 		failed := utils.DownloadAndCheckFilesInFileList(resourceURL, lack)
 		log.Println("下载完毕")
-		if failed == 0 {
-			utils.WriteStringToFile("./updateinfo.json", updateinfo.ToJSON(ui))
+		if failed != 0 {
+			log.Println("部分文件下载失败")
+			time.Sleep(60 * time.Second)
+			os.Exit(0)
 		}
 	} else {
 		log.Println("已是最新版")
 	}
+	if ui.FixVersion > lui.FixVersion {
+		for i, hf := range ui.Fixs {
+			log.Printf("正在应用补丁包:%d/%d\n", i+1, len(ui.Fixs))
+			err := hf.Do()
+			if err != nil {
+				log.Println("补丁包应用失败:")
+				log.Println(err)
+				time.Sleep(60 * time.Second)
+				os.Exit(0)
+			}
+		}
+	} else {
+		log.Println("没有新的补丁")
+	}
+	utils.WriteStringToFile("./updateinfo.json", updateinfo.ToJSON(ui))
 	launchGameLauncher()
 }
 
