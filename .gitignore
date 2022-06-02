@@ -1,6 +1,6 @@
 game/
 game_backup/
 pack/
-*.exe
+program/
 build/
 updaterhash

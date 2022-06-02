@@ -11,6 +11,7 @@ import (
 
 	"mau2/config"
 	"mau2/filelist"
+	"mau2/proxy"
 	"mau2/updateinfo"
 	"mau2/utils"
 )
@@ -32,7 +33,7 @@ func main() {
 			utils.WriteStringToFile("./updaterhash", selfHash)
 			log.Println(selfHash)
 		case "launch":
-			launchGameLauncher()
+			launchGame()
 		}
 		return
 	}
@@ -111,10 +112,10 @@ func autoUpdate() {
 		log.Println("没有新的补丁")
 	}
 	utils.WriteStringToFile("./updateinfo.json", updateinfo.ToJSON(ui))
-	launchGameLauncher()
+	launchGame()
 }
 
-func launchGameLauncher() {
+func launchGame() {
 	log.Println("正在启动游戏启动器，请不要关闭更新器窗口")
 	launcherType := "none"
 	if _, e := os.Stat("./game/Launcher.jar"); e == nil {
@@ -143,6 +144,7 @@ func launchGameLauncher() {
 	//使用win32api关闭命令行窗口
 	console := w32.GetConsoleWindow()
 	w32.ShowWindow(console, w32.SW_HIDE)
+	setUpProxy()
 }
 
 func selfUpdate() {
@@ -173,4 +175,10 @@ func finishSelfUpdate() {
 	os.Remove(filepath.Join(filepath.Dir(os.Args[0]), "SelfUpdater.exe"))
 	log.Println("自我更新完成")
 	autoUpdate()
+}
+
+func setUpProxy() {
+	if config.UseProxy {
+		proxy.SetUp(config.ProxyListenAddr, config.ProxyConnectTo, false)
+	}
 }

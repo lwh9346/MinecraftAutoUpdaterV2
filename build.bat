@@ -7,3 +7,6 @@ strip ./program/SelfUpdater.exe
 upx -9 ./program/SelfUpdater.exe
 upx -9 ./program/AutoUpdater.exe
 program\AutoUpdater.exe hash
+set GOOS=linux
+go build -o ./program/proxy ./pserver/main.go
+upx -9 ./program/proxy
