@@ -12,7 +12,7 @@ import (
 	"mau2/filelist"
 )
 
-//DownloadFile 简单地下载文件
+// DownloadFile 简单地下载文件
 func DownloadFile(url, destDir string) error {
 	destFile, err := os.Create(destDir)
 	if err != nil {
@@ -51,7 +51,7 @@ func downloadFileAndCheck(url, destDir, hash string, limitor, callback chan (int
 	}
 }
 
-//DownloadAndCheckFilesInFileList 下载并检验文件
+// DownloadAndCheckFilesInFileList 下载并检验文件
 func DownloadAndCheckFilesInFileList(rootURL string, filelist filelist.FileList) int {
 	nFiles := len(filelist)
 	var succeed, failed int

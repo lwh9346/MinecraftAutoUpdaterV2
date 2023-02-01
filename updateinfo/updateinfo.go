@@ -14,7 +14,7 @@ type Fix struct {
 	Source    string `json:"source"`    //op为remove时留空
 }
 
-//UpdateInfo 更新器更新所需要的信息
+// UpdateInfo 更新器更新所需要的信息
 type UpdateInfo struct {
 	GameVersion int      `json:"version"`
 	IgnoreList  []string `json:"ignore_list"`

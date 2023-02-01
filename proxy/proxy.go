@@ -10,7 +10,7 @@ import (
 	"github.com/golang/snappy"
 )
 
-//SetUp 建立一个代理
+// SetUp 建立一个代理
 func SetUp(listenAddr, targetAddr string, isServer bool) {
 	listener, err := net.Listen("tcp", listenAddr)
 	if err != nil {
