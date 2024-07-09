@@ -127,7 +127,7 @@ func launchGame() {
 	var cmd *exec.Cmd
 	switch launcherType {
 	case "jar":
-		cmd = exec.Command("./jre8/bin/java.exe", "-jar", "Launcher.jar")
+		cmd = exec.Command(config.JavaBinaryPath, "-jar", "Launcher.jar")
 	case "exe":
 		cmd = exec.Command("./Launcher.exe")
 	case "none":
